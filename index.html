@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Control Panel</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+        
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #111;
+            color: #0f0;
+            font-family: 'VT323', monospace;
+        }
+        
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: -250px;
+            top: 0;
+            width: 270px;
+            height: 100vh;
+            background: rgba(34, 34, 34, 0.9);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 0 20px #0f0;
+            clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
+            transition: left 0.3s ease-in-out;
+        }
+        
+        .right-sidebar {
+            position: fixed;
+            right: -250px;
+            top: 0;
+            width: 270px;
+            height: 100vh;
+            background: rgba(34, 34, 34, 0.9);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 0 20px #0f0;
+            clip-path: polygon(100% 0, 0 0, 0 100%, 90% 100%);
+            transition: right 0.3s ease-in-out;
+        }
+        
+        body:hover .sidebar {
+            left: 0;
+        }
+        
+        body:hover .right-sidebar {
+            right: 0;
+        }
+        
+        .button {
+            width: 80%;
+            margin: 15px 0;
+            padding: 20px;
+            font-size: 18px;
+            color: #0f0;
+            background: #222;
+            border: 2px solid #0f0;
+            cursor: pointer;
+            text-shadow: 0 0 10px #0f0;
+            transition: background 0.3s, color 0.3s;
+        }
+        .button:hover {
+            background: #0f0;
+            color: #111;
+        }
+        
+        .content {
+            margin-left: 290px; /* Adds space for the left sidebar */
+            margin-right: 290px; /* Adds space for the right sidebar */
+            text-align: center;
+            font-size: 48px;
+            text-shadow: 0 0 10px #0f0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: auto;
+            box-sizing: border-box;
+        }
+
+        .sidebar-title {
+            color: #0f0;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #0f0;
+            font-family: 'VT323', monospace;
+        }
+
+    </style>
+</head>
+<body>
+    <canvas id="background"></canvas>
+    <div class="sidebar">
+        <div class="sidebar-title">LED Controls</div>
+        <button class="button" onclick="toggleLED(1)">LED 1</button>
+        <button class="button" onclick="toggleLED(2)">LED 2</button>
+        <button class="button" onclick="toggleLED(3)">LED 3</button>
+        <button class="button" onclick="toggleLED(4)">LED 4</button>
+        <button class="button" onclick="toggleLED(5)">LED 5</button>
+        <button class="button" onclick="toggleLED(6)">LED 6</button>
+        <button class="button" onclick="toggleLED(7)">LED 7</button>
+        <button class="button" onclick="toggleLED(8)">LED 8</button>
+    </div>
+    <div class="right-sidebar">
+        <div class="sidebar-title">Other Controls</div>
+        <button class="button" onclick="toggleControl(1)">Control 1</button>
+        <button class="button" onclick="toggleControl(2)">Control 2</button>
+        <button class="button" onclick="toggleControl(3)">Control 3</button>
+        <button class="button" onclick="toggleControl(4)">Control 4</button>
+    </div>
+    <div class="content">System Control Panel</div>
+    <script>
+moon_is_entering = false;
+moon_is_leaving = false;
+moon_in_center = false;
+
+        const canvas = document.getElementById("background");
+        const ctx = canvas.getContext("2d");
+    
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+    
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas();
+    
+        let traces = [];
+        for (let i = 0; i < 50; i++) {
+            traces.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                dx: (Math.random() - 0.5) * 1.5, // Keep the movement slow
+                dy: (Math.random() - 0.5) * 1.5  // Keep the movement slow
+            });
+        }
+    
+        function drawCircuit() {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+            ctx.strokeStyle = "#0f0";
+            ctx.lineWidth = 1.5;
+    
+            for (let trace of traces) {
+                ctx.beginPath();
+                ctx.moveTo(trace.x, trace.y);
+                trace.x += trace.dx;
+                trace.y += trace.dy;
+    
+                // Keep the speed consistent by adjusting direction slightly at random intervals
+                if (Math.random() < 0.05) {
+                    trace.dx *= -1;
+                }
+                if (Math.random() < 0.05) {
+                    trace.dy *= -1;
+                }
+    
+                ctx.lineTo(trace.x, trace.y);
+                ctx.stroke();
+                ctx.closePath();
+    
+                // Boundary check to ensure the traces stay within canvas bounds
+                if (trace.x < 0 || trace.x > canvas.width) trace.dx = (Math.random() - 0.5) * 1.5;
+                if (trace.y < 0 || trace.y > canvas.height) trace.dy = (Math.random() - 0.5) * 1.5;
+            }
+    
+            if( moon_in_center )
+            {
+                ctx.arc(canvas.width / 2, moonY, 100, 0, Math.PI * 2, false);
+                ctx.fillStyle = '#0f0'; // Electric green
+                ctx.fill();
+            }
+
+            // Keep drawing the circuit without interference from mouse events
+            requestAnimationFrame(drawCircuit);
+        }
+        drawCircuit();
+    
+        let moonY = -200; // Start the moon off-screen
+let moonSpeed = 2.5; // Adjust speed of moon
+
+function drawMoon() {
+    ctx.beginPath();
+    ctx.arc(canvas.width / 2, moonY, 100, 0, Math.PI * 2, false);
+    ctx.fillStyle = '#0f0'; // Electric green
+    ctx.fill();
+    ctx.closePath();
+}
+
+function updateMoon() {
+    if (moonY < canvas.height / 2) {
+        moonY += moonSpeed; // Move moon up when sidebars are active
+    }
+    drawMoon();
+}
+
+function moveMoonOut() {
+    if (moonY > -200) {
+        moonY -= moonSpeed; // Move moon out of view when sidebars are hidden
+    }
+    drawMoon();
+}
+
+
+// Trigger the moon animation when sidebars are revealed
+document.body.addEventListener('mouseenter', () => {
+    if (!moon_is_entering) {
+
+        if(moon_is_leaving) {
+            moon_is_leaving = false;
+            clearInterval(leaveMoonInterval);
+        }
+        moon_is_entering = true;
+
+        enterMoonInterval = setInterval(() => {
+        updateMoon(); // Move the moon into view
+        if (moonY >= canvas.height / 2) {
+            clearInterval(enterMoonInterval); // Stop moving moon once it's in place
+            moon_is_entering = false;
+            moon_in_center = true;
+        }
+    }, 16); // Smooth movement (roughly 60fps)
+    }
+});
+
+// Move moon out of frame when mouse leaves
+document.body.addEventListener('mouseleave', () => {
+    if (!moon_is_leaving) {
+
+        if(moon_is_entering) {
+            moon_is_entering = false;
+            clearInterval(enterMoonInterval);
+        }
+        moon_is_leaving = true;
+        moon_in_center = false;
+
+        leaveMoonInterval = setInterval(() => {
+        moveMoonOut(); // Move the moon out of view
+        if (moonY <= -200) {
+            clearInterval(leaveMoonInterval); // Stop moving moon once it's off-screen
+            moon_is_leaving = false;
+        }
+    }, 16); // Smooth movement (roughly 60fps)
+}
+});
+
+    </script>
+    
+    
+</body>
+</html>
